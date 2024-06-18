@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import pygame as pg
+import math
 
 
 WIDTH, HEIGHT = 1600, 900
@@ -9,6 +10,7 @@ KEY = {pg.K_UP:(0, -5),
        pg.K_DOWN:(0, +5),
        pg.K_LEFT:(-5, 0),
        pg.K_RIGHT:(+5, 0),}
+f = True
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -69,6 +71,29 @@ def game_over(screen: pg.Surface) -> None:
         t += 1
 
 
+def follow_bom(bb_pos: tuple[int, int], kk_pos: tuple[int, int]) -> tuple[int, int]:
+    """
+    4.追従型爆弾
+    引数：爆弾の現在座標(x, y), こうかとんの現在座標(x, y)
+    戻り値：タプル(爆弾の速度x成分, 爆弾の速度y成分)
+    """
+    global f
+    dx = bb_pos[0] - kk_pos[0]
+    dy = bb_pos[1] - kk_pos[1]
+    print(dx^2, dy^2)
+    d = abs(dx^2+dy^2)
+    if d < 300 and f:
+        dx, dy = -5, 0
+    else:
+        f = False
+        dx /= d
+        dy /= d
+        dx *= math.sqrt(50)
+        dy *= math.sqrt(50)
+        print(dx, dy)
+    return dx, dy
+
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRect or 爆弾Rect
@@ -123,6 +148,9 @@ def main():
         except KeyError:
             screen.blit(kk_img, kk_rct)  #何も押してない or 押下キーが矢印キー以外だった場合
         
+        #print((kk_rct[0], kk_rct[1]), (bb_rct[0], bb_rct[1]))
+        #vx = follow_bom((kk_rct[0], kk_rct[1]), (bb_rct[0], bb_rct[1]))[0]
+        #vy = follow_bom((kk_rct[0], kk_rct[1]), (bb_rct[0], bb_rct[1]))[1]
         bb_accs = bom_setting()[0]  #爆弾の加速度のリストを入れる
         bb_imgs = bom_setting()[1]  #拡大爆弾のSurfaceのリストを入れる
         avx = vx*bb_accs[min(tmr//500, 9)]  #加速度x方向を掛けたavxを作成
