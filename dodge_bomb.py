@@ -12,6 +12,20 @@ KEY = {pg.K_UP:(0, -5),
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数：こうかとんRect or 爆弾Rect
+    戻り値：タプル(横方向判定結果, 縦方向判定結果)
+    画面外ならTrue, 画面外ならFalse
+    """
+    yoko, tate = True, True
+    if obj_rct.left < 0 or WIDTH < obj_rct.right: #横方向判定
+        yoko = False
+    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom: #縦方向判定
+        tate = False
+    return yoko, tate
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -42,6 +56,8 @@ def main():
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
         kk_rct.move_ip(sum_mv)
+        if (not check_bound(kk_rct)[0]) or (not check_bound(kk_rct)[1]):
+            kk_rct.move_ip((sum_mv[0]*-1, sum_mv[1]*-1))
         screen.blit(kk_img, kk_rct)
         bb_rct.move_ip((vx, vy))
         screen.blit(bb_img, bb_rct)
