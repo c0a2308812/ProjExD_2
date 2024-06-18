@@ -45,6 +45,30 @@ def bom_setting() -> tuple[list, list]:
     return saccs, bb_list
 
 
+def game_over(screen: pg.Surface) -> None:
+    """
+    3.ゲームオーバー画面
+    引数：Surface
+    戻り値：なし
+    """
+    go_img = pg.Surface((WIDTH, HEIGHT))  #画面サイズと同じSurfaceを用意する
+    pg.draw.rect(go_img, (0, 0, 0), (0, 0, WIDTH, HEIGHT))  #画面サイズと同じ黒い四角を描画する
+    go_img.set_alpha(128)  #四角を半透明にする
+    screen.blit(go_img, [0, 0])  #半透明の四角をScreenに貼り付ける
+    fonto = pg.font.Font(None, 80)  #文字の大きさを80にする
+    txt = fonto.render("Game Over", True, (255, 255, 255))  #白文字でGame Overと書いたSurfaceをtxtに入れる
+    screen.blit(txt, [WIDTH/2-152, HEIGHT/2-10])  #画面中央にGame Overと表示する
+    cry_kk_img = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 2.0)  #泣いているこうかとん画像を2倍に拡大する
+    screen.blit(cry_kk_img, [WIDTH/2-260, HEIGHT/2-60])  #文字の左側に泣いているこうかとんを表示
+    screen.blit(cry_kk_img, [WIDTH/2+170, HEIGHT/2-60])  #文字の右側に泣いているこうかとんを表示
+    t = 0
+    clock = pg.time.Clock()
+    while t <= 5:  #5秒になるまで
+        pg.display.update()
+        clock.tick(1)
+        t += 1
+
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRect or 爆弾Rect
@@ -52,9 +76,9 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     画面外ならTrue, 画面外ならFalse
     """
     yoko, tate = True, True
-    if obj_rct.left < 0 or WIDTH < obj_rct.right: #横方向判定
+    if obj_rct.left <= 0 or WIDTH <= obj_rct.right: #横方向判定
         yoko = False
-    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom: #縦方向判定
+    if obj_rct.top <= 0 or HEIGHT <= obj_rct.bottom: #縦方向判定
         tate = False
     return yoko, tate
 
@@ -81,6 +105,7 @@ def main():
             if event.type == pg.QUIT: 
                 return
         if kk_rct.colliderect(bb_rct):
+            game_over(screen)
             return
         screen.blit(bg_img, [0, 0]) 
 
