@@ -6,7 +6,7 @@ import math
 
 
 WIDTH, HEIGHT = 1600, 900
-KEY = {pg.K_UP:(0, -5),
+KEY = {pg.K_UP:(0, -5),  #keyに応じたこうかとんの移動量辞書
        pg.K_DOWN:(0, +5),
        pg.K_LEFT:(-5, 0),
        pg.K_RIGHT:(+5, 0),}
