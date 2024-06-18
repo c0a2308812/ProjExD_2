@@ -12,6 +12,24 @@ KEY = {pg.K_UP:(0, -5),
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+def fly_direction(kk_img: pg.Surface) -> dict[tuple[int, int]:pg.Surface]:
+    """
+    1.飛ぶ方向に従ってこうかとん画像を切り替える
+    引数：こうかとん画像のSurface
+    戻り値：辞書
+    {押下キーに対する移動量の合計値タプル:rotozoomしたSurface}
+    """
+    fly_kk = {(-5, 0):pg.transform.rotozoom(kk_img, 0, 1.0),
+              (-5, +5):pg.transform.rotozoom(kk_img, 45, 1.0),
+              (-5, -5):pg.transform.rotozoom(kk_img, -45, 1.0),
+              (0, +5):pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), -90, 1.0),
+              (+5, +5):pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), -45, 1.0),
+              (+5, 0):pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 0, 1.0),
+              (+5, -5):pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 45, 1.0),
+              (0, -5):pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 90, 1.0)}
+    return fly_kk
+
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRect or 爆弾Rect
@@ -58,9 +76,13 @@ def main():
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
         kk_rct.move_ip(sum_mv)
-        if (not check_bound(kk_rct)[0]) or (not check_bound(kk_rct)[1]):
+        if (not check_bound(kk_rct)[0]) or (not check_bound(kk_rct)[1]):  #こうかとん衝突判定
             kk_rct.move_ip((sum_mv[0]*-1, sum_mv[1]*-1))
-        screen.blit(kk_img, kk_rct)
+        try:
+            screen.blit(fly_direction(kk_img)[tuple(sum_mv)], kk_rct)  #押下キーが矢印キーだった場合
+        except KeyError:
+            screen.blit(kk_img, kk_rct)  #何も押してない or 押下キーが矢印キー以外だった場合
+        
         bb_rct.move_ip((vx, vy))
         if not check_bound(bb_rct)[0]:
             vx *= -1
