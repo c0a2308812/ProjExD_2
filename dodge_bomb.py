@@ -30,6 +30,21 @@ def fly_direction(kk_img: pg.Surface) -> dict[tuple[int, int]:pg.Surface]:
     return fly_kk
 
 
+def bom_setting() -> tuple[list, list]:
+    """
+    2.時間とともに爆弾が拡大, 加速する
+    引数：なし
+    戻り値：タプル(加速度のリスト, 拡大爆弾Surfaceのリスト)
+    """
+    bb_list = []
+    saccs = [a for a in range(1, 11)]
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_list.append(bb_img)
+    return saccs, bb_list
+
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんRect or 爆弾Rect
@@ -83,13 +98,19 @@ def main():
         except KeyError:
             screen.blit(kk_img, kk_rct)  #何も押してない or 押下キーが矢印キー以外だった場合
         
-        bb_rct.move_ip((vx, vy))
-        if not check_bound(bb_rct)[0]:
-            vx *= -1
-        if not check_bound(bb_rct)[1]:
-            vy *= -1
-        screen.blit(bb_img, bb_rct)
-        pg.display.update()
+        bb_accs = bom_setting()[0]  #爆弾の加速度のリストを入れる
+        bb_imgs = bom_setting()[1]  #拡大爆弾のSurfaceのリストを入れる
+        avx = vx*bb_accs[min(tmr//500, 9)]  #加速度x方向を掛けたavxを作成
+        avy = vy*bb_accs[min(tmr//500, 9)]  #加速度y方向を掛けたavyを作成
+        bb_img = bb_imgs[min(tmr//500, 9)]  #拡大された爆弾をbb_imgに入れる
+        bb_img.set_colorkey((0, 0, 0))  #爆弾の周りを透明にする
+        bb_rct.move_ip((avx, avy))  #爆弾を動かす
+        if not check_bound(bb_rct)[0]:  #爆弾が左右の壁に衝突したら
+            vx *= -1  #x成分を反転させる
+        if not check_bound(bb_rct)[1]:  #爆弾が上下の壁に衝突したら
+            vy *= -1  #y成分を反転させる
+        screen.blit(bb_img, bb_rct)  #爆弾SurfaceをScreenに貼り付ける
+        pg.display.update()  #画面を更新する
         tmr += 1
         clock.tick(50)
 
